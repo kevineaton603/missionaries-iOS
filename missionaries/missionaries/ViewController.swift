@@ -7,63 +7,44 @@
 //
 
 import UIKit
-/**
- * This idea came from...
- * https://stackoverflow.com/questions/34882746/generic-function-to-output-to-uitextfield-or-uilabel
- */
-protocol setText {
-    func setText(repeatingValue: String, count: Int) -> String
-}
-extension setText {
-    func setText(repeatingValue:String, count: Int) -> String {
-        let res = String(repeating: repeatingValue, count: count)
-        return res
-    }
-}
-extension UILabel:setText{
-    func setUILabelText(repeatingValue: String, count:Int ) {
-        self.text = setText(repeatingValue: repeatingValue, count:count)
-    }
-}
 
 class ViewController: UIViewController {
 
     @IBOutlet weak var WestMissionaries: UIButton!
     @IBOutlet weak var WestCannibals: UIButton!
-    @IBOutlet weak var EastMissionaries: UILabel!
-    @IBOutlet weak var EastCannibals: UILabel!
-    @IBOutlet weak var WestPassengers: UILabel!
-    @IBOutlet weak var EastPassengers: UILabel!
-    @IBOutlet weak var WestBoat: UILabel!
-    @IBOutlet weak var EastBoat: UILabel!
+    @IBOutlet weak var EastMissionaries: UIButton!
+    @IBOutlet weak var EastCannibals: UIButton!
+    @IBOutlet weak var WestPassengers: UIButton!
+    @IBOutlet weak var EastPassengers: UIButton!
+    @IBOutlet weak var WestBoat: UIButton!
+    @IBOutlet weak var EastBoat: UIButton!
     public var GameState = Position(boatOnWestBank: true, westMissionaries: 3, eastMissionaries: 0, westCannibals: 3, eastCannibals: 0, boatMissionaries: 0, boatCannibals: 0)
 
     override func viewDidLoad() {
         super.viewDidLoad()
         updateDisplay()
-        GameState.westCannibals-=1
-        GameState.eastCannibals+=1
-        updateDisplay()
     }
     func updateDisplay(){
         WestMissionaries.setTitle(String(repeating: "⛪️", count:GameState.westMissionaries), for: .normal)
         WestCannibals.setTitle(String(repeating: "🔪", count: GameState.westCannibals), for: .normal)
-        EastMissionaries.setUILabelText(repeatingValue: "⛪️", count:GameState.eastMissionaries)
-        EastCannibals.setUILabelText(repeatingValue: "🔪", count: GameState.eastCannibals)
+        EastMissionaries.setTitle(String(repeating: "⛪️", count:GameState.eastMissionaries), for: .normal)
+        EastCannibals.setTitle(String(repeating: "🔪", count: GameState.eastCannibals), for: .normal)
         let boatMissionariesString = String(repeating: "⛪️", count: GameState.boatMissionaries)
         let boatCannibalsString = String(repeating: "🔪", count: GameState.boatCannibals)
         if GameState.boatOnWestBank{
-            WestBoat.setUILabelText(repeatingValue: "🛶", count: 1)
-            EastBoat.setUILabelText(repeatingValue: "", count: 1)
-            WestPassengers.setUILabelText(repeatingValue: boatCannibalsString + boatMissionariesString, count: 1)
-            EastPassengers.setUILabelText(repeatingValue: "", count: 1)
+            WestBoat.setTitle(String(repeating: "🛶", count: 1), for: .normal)
+            EastBoat.setTitle(String(repeating: "", count: 1), for: .normal)
+            WestPassengers.setTitle(String(repeating: boatCannibalsString + boatMissionariesString, count: 1), for: .normal)
+            EastPassengers.setTitle(String(repeating: "", count: 1), for: .normal)
         }
         else {
-            EastBoat.setUILabelText(repeatingValue: "🛶", count: 1)
-            EastPassengers.setUILabelText(repeatingValue: boatCannibalsString + boatMissionariesString, count: 1)
-            WestPassengers.setUILabelText(repeatingValue: "", count: 1)
+            EastBoat.setTitle(String(repeating: "🛶", count: 1), for: .normal)
+            WestBoat.setTitle(String(repeating: "", count: 1), for: .normal)
+            EastPassengers.setTitle(String(repeating: boatCannibalsString + boatMissionariesString, count: 1), for: .normal)
+            WestPassengers.setTitle(String(repeating: "", count: 1), for: .normal)
         }
     }
+    
     @IBAction func WestMissionariesClick(_ sender: UIButton) {
         if(GameState.boatOnWestBank && GameState.onBoat() < 2){
             GameState.westMissionaries-=1
@@ -72,7 +53,43 @@ class ViewController: UIViewController {
         updateDisplay()
     }
     
+    @IBAction func WestCannibalsClick(_ sender: Any) {
+        if(GameState.boatOnWestBank && GameState.onBoat() < 2){
+            GameState.westCannibals-=1
+            GameState.boatCannibals+=1
+        }
+        updateDisplay()
+    }
     
+
+    @IBAction func EastMissionariesClick(_ sender: Any) {
+        if(!GameState.boatOnWestBank && GameState.onBoat() < 2){
+            GameState.eastMissionaries-=1
+            GameState.boatMissionaries+=1
+        }
+        updateDisplay()
+    }
+    
+    @IBAction func EastCannibalsClick(_ sender: Any) {
+        if(!GameState.boatOnWestBank && GameState.onBoat() < 2){
+            GameState.eastCannibals-=1
+            GameState.boatCannibals+=1
+        }
+        updateDisplay()
+    }
+    @IBAction func WestBoatClick(_ sender: Any) {
+        if(GameState.onBoat() > 0){
+            GameState.moveEast()
+            updateDisplay()
+        }
+        
+    }
+    @IBAction func EastBoatClick(_ sender: Any) {
+        if(GameState.onBoat() > 0){
+            GameState.moveWest()
+            updateDisplay()
+        }
+    }
 }
 struct Position {
     var boatOnWestBank: Bool
@@ -86,10 +103,18 @@ struct Position {
         return boatMissionaries + boatCannibals
     }
     
-    func moveEast(missionariesOnBoat: Int, cannibalsOnBoat: Int){
-        
+    mutating func moveEast(){
+        boatOnWestBank = false
+        eastMissionaries += boatMissionaries
+        boatMissionaries -= boatMissionaries
+        eastCannibals += boatCannibals
+        boatCannibals -= boatCannibals
     }
-    func moveWest(missionariesOnBoat: Int, cannibalsOnBoat: Int){
-        
+    mutating func moveWest(){
+        boatOnWestBank = true
+        westMissionaries += boatMissionaries
+        boatMissionaries -= boatMissionaries
+        westCannibals += boatCannibals
+        boatCannibals -= boatCannibals
     }
 }
