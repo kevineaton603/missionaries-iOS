@@ -28,22 +28,51 @@ extension UILabel:setText{
 
 class ViewController: UIViewController {
 
-    @IBOutlet weak var WestMissionaries: UILabel!
-    @IBOutlet weak var WestCannibals: UILabel!
+    @IBOutlet weak var WestMissionaries: UIButton!
+    @IBOutlet weak var WestCannibals: UIButton!
     @IBOutlet weak var EastMissionaries: UILabel!
     @IBOutlet weak var EastCannibals: UILabel!
     @IBOutlet weak var WestPassengers: UILabel!
     @IBOutlet weak var EastPassengers: UILabel!
     @IBOutlet weak var WestBoat: UILabel!
     @IBOutlet weak var EastBoat: UILabel!
+    public var GameState = Position(boatOnWestBank: true, westMissionaries: 3, eastMissionaries: 0, westCannibals: 3, eastCannibals: 0, boatMissionaries: 0, boatCannibals: 0)
+
     override func viewDidLoad() {
         super.viewDidLoad()
-        var GameState = Position(boatOnWestBank: true, westMissionaries: 3, eastMissionaries: 3, westCannibals: 0, eastCannibals: 0, boatMissionaries: 0, boatCannibals: 0)
-        WestMissionaries.setUILabelText(repeatingValue: "⛪️", count:3)
-        EastMissionaries.setUILabelText(repeatingValue: " ", count:1)
+        updateDisplay()
+        GameState.westCannibals-=1
+        GameState.eastCannibals+=1
+        updateDisplay()
     }
-
-
+    func updateDisplay(){
+        WestMissionaries.setTitle(String(repeating: "⛪️", count:GameState.westMissionaries), for: .normal)
+        WestCannibals.setTitle(String(repeating: "🔪", count: GameState.westCannibals), for: .normal)
+        EastMissionaries.setUILabelText(repeatingValue: "⛪️", count:GameState.eastMissionaries)
+        EastCannibals.setUILabelText(repeatingValue: "🔪", count: GameState.eastCannibals)
+        let boatMissionariesString = String(repeating: "⛪️", count: GameState.boatMissionaries)
+        let boatCannibalsString = String(repeating: "🔪", count: GameState.boatCannibals)
+        if GameState.boatOnWestBank{
+            WestBoat.setUILabelText(repeatingValue: "🛶", count: 1)
+            EastBoat.setUILabelText(repeatingValue: "", count: 1)
+            WestPassengers.setUILabelText(repeatingValue: boatCannibalsString + boatMissionariesString, count: 1)
+            EastPassengers.setUILabelText(repeatingValue: "", count: 1)
+        }
+        else {
+            EastBoat.setUILabelText(repeatingValue: "🛶", count: 1)
+            EastPassengers.setUILabelText(repeatingValue: boatCannibalsString + boatMissionariesString, count: 1)
+            WestPassengers.setUILabelText(repeatingValue: "", count: 1)
+        }
+    }
+    @IBAction func WestMissionariesClick(_ sender: UIButton) {
+        if(GameState.boatOnWestBank && GameState.onBoat() < 2){
+            GameState.westMissionaries-=1
+            GameState.boatMissionaries+=1
+        }
+        updateDisplay()
+    }
+    
+    
 }
 struct Position {
     var boatOnWestBank: Bool
