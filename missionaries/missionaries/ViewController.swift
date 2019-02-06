@@ -28,9 +28,14 @@ class ViewController: UIViewController {
         updateDisplay()
     }
     func disableButtons(){
-        EastBoat.isEnabled = false
         WestBoat.isEnabled = false
-        
+        EastBoat.isEnabled = false
+        EastMissionaries.isEnabled = false
+        WestMissionaries.isEnabled = false
+        WestCannibals.isEnabled = false
+        EastCannibals.isEnabled = false
+        WestPassengers.isEnabled = false
+        EastPassengers.isEnabled = false
     }
     func isValid()->Bool{
         if(GameState.boatOnWestBank){
@@ -47,7 +52,7 @@ class ViewController: UIViewController {
         return true
     }
     func isWin()->Bool{
-        if(GameState.westMissionaries == 0 && GameState.westCannibals == 0 && GameState.eastMissionaries == 0 && GameState.eastCannibals == 0){
+        if(GameState.westMissionaries == 0 && GameState.westCannibals == 0 && GameState.eastMissionaries == 3 && GameState.eastCannibals == 3){
             return true
         }
         else{
@@ -56,6 +61,14 @@ class ViewController: UIViewController {
     }
     func resetGame(){
         GameState = Position(boatOnWestBank: true, westMissionaries: 3, eastMissionaries: 0, westCannibals: 3, eastCannibals: 0, boatMissionaries: 0, boatCannibals: 0, crosses: 0)
+        WestBoat.isEnabled = true
+        EastBoat.isEnabled = true
+        EastMissionaries.isEnabled = true
+        WestMissionaries.isEnabled = true
+        WestCannibals.isEnabled = true
+        EastCannibals.isEnabled = true
+        WestPassengers.isEnabled = true
+        EastPassengers.isEnabled = true
     }
     func updateDisplay(){
         WestMissionaries.setTitle(String(repeating: "⛪️", count:GameState.westMissionaries), for: .normal)
@@ -80,16 +93,21 @@ class ViewController: UIViewController {
         if(isValid()){
             if(isWin()){
                 WinLoss.text = "You Won!"
+                disableButtons()
             }
             else{
+                //Neither outcome has occured
                 WinLoss.text = nil
             }
         }
         else{
+            //Displays losing text and disables all buttons
             WinLoss.text = "You Lost!"
+            disableButtons()
+            
         }
     }
-    
+    //Triggers when the West Missionaries are clicked
     @IBAction func WestMissionariesClick(_ sender: UIButton) {
         if(GameState.boatOnWestBank && GameState.onBoat() < 2){
             GameState.westMissionaries-=1
@@ -97,7 +115,7 @@ class ViewController: UIViewController {
         }
         updateDisplay()
     }
-    
+    //Triggers when the West Cannibals are clicked
     @IBAction func WestCannibalsClick(_ sender: Any) {
         if(GameState.boatOnWestBank && GameState.onBoat() < 2){
             GameState.westCannibals-=1
@@ -105,8 +123,7 @@ class ViewController: UIViewController {
         }
         updateDisplay()
     }
-    
-
+    //Triggers when the East Missionaries are clicked
     @IBAction func EastMissionariesClick(_ sender: Any) {
         if(!GameState.boatOnWestBank && GameState.onBoat() < 2){
             GameState.eastMissionaries-=1
@@ -114,7 +131,7 @@ class ViewController: UIViewController {
         }
         updateDisplay()
     }
-    
+    //Triggers when the East Cannibals are clicked
     @IBAction func EastCannibalsClick(_ sender: Any) {
         if(!GameState.boatOnWestBank && GameState.onBoat() < 2){
             GameState.eastCannibals-=1
@@ -122,6 +139,7 @@ class ViewController: UIViewController {
         }
         updateDisplay()
     }
+    //Triggers when the West Boat are clicked
     @IBAction func WestBoatClick(_ sender: Any) {
         if(GameState.onBoat() > 0){
             GameState.moveEast()
@@ -129,12 +147,14 @@ class ViewController: UIViewController {
         }
         
     }
+    //Triggers when the East Boat are clicked
     @IBAction func EastBoatClick(_ sender: Any) {
         if(GameState.onBoat() > 0){
             GameState.moveWest()
             updateDisplay()
         }
     }
+    //Triggers when the East Passengers are clicked
     @IBAction func EastPassengers(_ sender: UIButton) {
         if(!GameState.boatOnWestBank){
             if(sender.currentTitle != nil && sender.currentTitle != ""){
@@ -153,6 +173,7 @@ class ViewController: UIViewController {
         }
         
     }
+    //Triggers when the West Passengers are clicked
     @IBAction func WestPassengers(_ sender: UIButton) {
         if(GameState.boatOnWestBank){
             if(sender.currentTitle != nil && sender.currentTitle != ""){
@@ -171,6 +192,7 @@ class ViewController: UIViewController {
         }
 
     }
+    //Triggers when the Resest Game Button are clicked
     @IBAction func ResetGameClick(_ sender: Any) {
         resetGame()
         updateDisplay()
