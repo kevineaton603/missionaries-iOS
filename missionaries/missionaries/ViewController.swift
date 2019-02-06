@@ -18,11 +18,44 @@ class ViewController: UIViewController {
     @IBOutlet weak var EastPassengers: UIButton!
     @IBOutlet weak var WestBoat: UIButton!
     @IBOutlet weak var EastBoat: UIButton!
-    public var GameState = Position(boatOnWestBank: true, westMissionaries: 3, eastMissionaries: 0, westCannibals: 3, eastCannibals: 0, boatMissionaries: 0, boatCannibals: 0)
+    @IBOutlet weak var Reset: UIButton!
+    @IBOutlet weak var Crosses: UILabel!
+    @IBOutlet weak var WinLoss: UILabel!
+    public var GameState = Position(boatOnWestBank: true, westMissionaries: 3, eastMissionaries: 0, westCannibals: 3, eastCannibals: 0, boatMissionaries: 0, boatCannibals: 0, crosses: 0)
 
     override func viewDidLoad() {
         super.viewDidLoad()
         updateDisplay()
+    }
+    func disableButtons(){
+        EastBoat.isEnabled = false
+        WestBoat.isEnabled = false
+        
+    }
+    func isValid()->Bool{
+        if(GameState.boatOnWestBank){
+            if((GameState.westMissionaries + GameState.boatMissionaries < GameState.westCannibals + GameState.boatCannibals && GameState.westMissionaries != 0) || GameState.eastMissionaries < GameState.eastCannibals && GameState.eastMissionaries != 0){
+                return false
+            }
+        }
+        else{
+            if ((GameState.eastMissionaries + GameState.boatMissionaries < GameState.eastCannibals + GameState.boatCannibals && GameState.eastMissionaries != 0) || (GameState.westMissionaries < GameState.westCannibals && GameState.westMissionaries != 0)) {
+                return false
+            }
+        }
+        
+        return true
+    }
+    func isWin()->Bool{
+        if(GameState.westMissionaries == 0 && GameState.westCannibals == 0 && GameState.eastMissionaries == 0 && GameState.eastCannibals == 0){
+            return true
+        }
+        else{
+            return false
+        }
+    }
+    func resetGame(){
+        GameState = Position(boatOnWestBank: true, westMissionaries: 3, eastMissionaries: 0, westCannibals: 3, eastCannibals: 0, boatMissionaries: 0, boatCannibals: 0, crosses: 0)
     }
     func updateDisplay(){
         WestMissionaries.setTitle(String(repeating: "⛪️", count:GameState.westMissionaries), for: .normal)
@@ -42,6 +75,18 @@ class ViewController: UIViewController {
             WestBoat.setTitle(String(repeating: "", count: 1), for: .normal)
             EastPassengers.setTitle(String(repeating: boatCannibalsString + boatMissionariesString, count: 1), for: .normal)
             WestPassengers.setTitle(String(repeating: "", count: 1), for: .normal)
+        }
+        Crosses.text = String(GameState.crosses)
+        if(isValid()){
+            if(isWin()){
+                WinLoss.text = "You Won!"
+            }
+            else{
+                WinLoss.text = nil
+            }
+        }
+        else{
+            WinLoss.text = "You Lost!"
         }
     }
     
@@ -90,6 +135,46 @@ class ViewController: UIViewController {
             updateDisplay()
         }
     }
+    @IBAction func EastPassengers(_ sender: UIButton) {
+        if(!GameState.boatOnWestBank){
+            if(sender.currentTitle != nil && sender.currentTitle != ""){
+                var title = sender.currentTitle?.description
+                let char =  title?.removeLast()
+                if(char == "⛪️"){
+                    GameState.eastMissionaries+=1
+                    GameState.boatMissionaries-=1
+                }
+                else if(char == "🔪"){
+                    GameState.eastCannibals+=1
+                    GameState.boatCannibals-=1
+                }
+                updateDisplay()
+            }
+        }
+        
+    }
+    @IBAction func WestPassengers(_ sender: UIButton) {
+        if(GameState.boatOnWestBank){
+            if(sender.currentTitle != nil && sender.currentTitle != ""){
+                var title = sender.currentTitle?.description
+                let char =  title?.removeLast()
+                if(char == "⛪️"){
+                    GameState.westMissionaries+=1
+                    GameState.boatMissionaries-=1
+                }
+                else if(char == "🔪"){
+                    GameState.westMissionaries+=1
+                    GameState.boatCannibals-=1
+                }
+                updateDisplay()
+            }
+        }
+
+    }
+    @IBAction func ResetGameClick(_ sender: Any) {
+        resetGame()
+        updateDisplay()
+    }
 }
 struct Position {
     var boatOnWestBank: Bool
@@ -99,6 +184,7 @@ struct Position {
     var eastCannibals: Int
     var boatMissionaries: Int
     var boatCannibals:Int
+    var crosses:Int
     func onBoat()->Int{
         return boatMissionaries + boatCannibals
     }
@@ -109,6 +195,7 @@ struct Position {
         boatMissionaries -= boatMissionaries
         eastCannibals += boatCannibals
         boatCannibals -= boatCannibals
+        crosses += 1
     }
     mutating func moveWest(){
         boatOnWestBank = true
@@ -116,5 +203,6 @@ struct Position {
         boatMissionaries -= boatMissionaries
         westCannibals += boatCannibals
         boatCannibals -= boatCannibals
+        crosses += 1
     }
 }
