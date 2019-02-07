@@ -184,7 +184,7 @@ class ViewController: UIViewController {
                     GameState.boatMissionaries-=1
                 }
                 else if(char == "🔪"){
-                    GameState.westMissionaries+=1
+                    GameState.westCannibals+=1
                     GameState.boatCannibals-=1
                 }
                 updateDisplay()
